@@ -17,7 +17,7 @@ class portScan():
 
 
     def __stats__(self):
-        print(f"{'\033[94m'}\nTarget: {self.ip} {self.sp}-{self.ep} Spoofing:{self.spoof} Timeoit:{self.time} Length:{self.dlen} Flag:{self.flag} Msg:{self.msg}\n")
+        print(f"{'\033[94m'}\nTarget: {self.ip} Port:{self.sp}-{self.ep} Spoofing:{self.spoof} Timeout:{self.time} Length:{self.dlen} Flag:{self.flag} Msg:{self.msg}\n")
     
     def __connect__(self,port):
 
