@@ -2,6 +2,7 @@ import socket
 import threading
 from scapy.all import *
 import argparse
+from os import geteuid
 
 class portScan():
     def __init__(self,target,sp=1,ep=1000,spoof=0,time=1,dlen=200,flag="S",msg=""):
@@ -83,16 +84,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-ip", help="Target IP", type=str)
     parser.add_argument("-p", help="Port -p 1,100 or -p 100", type=str, default="1,1000")
-    parser.add_argument("-F", help="Activate FastScan", type=int, default=0)
+    parser.add_argument("-F", help="Activate FastScan", dest="F",action='store_true')
     parser.add_argument("-S", help="Activate Spoofing", type=int, default=0)
-    parser.add_argument("-C", help="Activate CustomScan", type=int, default=0)
     parser.add_argument("-t", help="Set Timeout", type=float, default=1)
-    parser.add_argument("-flag", help="Set Flag ,S,SA,R,F... ", type=str, default="S")
+    parser.add_argument("-flag", help="Set Flag S,SA,R,F... ", type=str, default="S")
     parser.add_argument("-msg", help="Raw Load", type=str, default="")
     parser.add_argument("-dlen", help="Receive length", type=int, default=200)
     parser.parse_args()
     args = parser.parse_args()
-    
+
+    if  geteuid() != 0 and (args.flag != "S" or args.S > 0) :
+        print(f"{'\033[33m'}[-]  Run as root required")
+        exit(0)
 
     if len(args.p.split(",")) == 2:
         sp = int(args.p.split(",")[0])
@@ -101,13 +104,13 @@ def main():
         sp = 1
         ep = int(args.p.split(",")[0])
 
-    if args.F == 0 and args.C == 0:
+    if args.F == 0 and args.flag == "S":
         portScan(args.ip,sp,ep,args.S,args.t,args.dlen,args.flag,args.msg).scan()
 
-    elif args.F == 1 and args.C ==0:
+    elif args.F == 1 and args.flag == "S":
         portScan(args.ip,sp,ep,args.S,args.t,args.dlen,args.flag,args.msg).Fscan()
 
-    elif args.F == 0 and args.C == 1:
+    elif args.F == 0 and args.flag != "S":
         portScan(args.ip,sp,ep,args.S,args.t,args.dlen,args.flag,args.msg).Cscan()
 
 try:
