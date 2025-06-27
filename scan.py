@@ -28,7 +28,7 @@ class portScan():
         if(self.s.connect_ex((self.ip,port)) == 0):
 
                 try:
-                    self.s.send(b"GET / HTTP/1.1\r\nHost: www.b00m.haHA\r\nConnection: close\r\n\r\n")
+                    self.s.send(self.msg.encode())
                     data = self.s.recv(self.dlen)
                 except:
                     data = b""
@@ -82,16 +82,17 @@ class portScan():
 def main():
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("-ip", help="Target IP", type=str)
+    parser.add_argument("-ip", help="Target IP", type=str,default=None)
     parser.add_argument("-p", help="Port -p 1,100 or -p 100", type=str, default="1,1000")
     parser.add_argument("-F", help="Activate FastScan", dest="F",action='store_true')
-    parser.add_argument("-S", help="Activate Spoofing", type=int, default=0)
+    parser.add_argument("-S", help="Activate Spoofing -S 10 or -S 100 ...", type=int, default=0)
     parser.add_argument("-t", help="Set Timeout", type=float, default=1)
     parser.add_argument("-flag", help="Set Flag S,SA,R,F... ", type=str, default="S")
     parser.add_argument("-msg", help="Raw Load", type=str, default="")
     parser.add_argument("-dlen", help="Receive length", type=int, default=200)
     parser.parse_args()
     args = parser.parse_args()
+
 
     if  geteuid() != 0 and (args.flag != "S" or args.S > 0) :
         print(f"{'\033[33m'}[-]  Run as root required")
@@ -104,7 +105,11 @@ def main():
         sp = 1
         ep = int(args.p.split(",")[0])
 
-    if args.F == 0 and args.flag == "S":
+
+    if args.ip == None:
+        print(f"{'\033[33m'}[-] python3 scan.py -h")
+
+    elif args.F == 0 and args.flag == "S":
         portScan(args.ip,sp,ep,args.S,args.t,args.dlen,args.flag,args.msg).scan()
 
     elif args.F == 1 and args.flag == "S":
@@ -112,6 +117,12 @@ def main():
 
     elif args.F == 0 and args.flag != "S":
         portScan(args.ip,sp,ep,args.S,args.t,args.dlen,args.flag,args.msg).Cscan()
+
+    elif args.F == 1 and args.flag !="S":
+        portScan(args.ip,sp,ep,args.S,args.t,args.dlen,args.flag,args.msg).Fscan()
+
+    else:
+        print(f"{'\033[33m'}[-] python3 scan.py -h")
 
 try:
     main()
